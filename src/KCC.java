@@ -21,45 +21,65 @@ public class KCC {
         int lineI = 0;
         // skip to header line of "int main()"
         while (lineI < lines.size() && Util.isNullOrEmpty(lines.get(lineI))) lineI++;
-
         // skip to first line of "int main() \n {"
         lineI += 2;
 
-        List<String> data = new ArrayList<>();
+        List<String> constants = new ArrayList<>();
+        List<Operation> operations = new ArrayList<>();
 
-        while (lines.get(lineI).contains("printf")) {
-            String[] lineParts = lines.get(lineI).split("\"");
-            String text = lineParts[1];
-            data.add(text);
+        String line;
+        while (!(line = lines.get(lineI)).equals("}")) { // inside main(){} function
+            processLine(constants, operations, line);
             lineI++;
         }
 
-        writeOFile(data);
+        writeOFile(constants, operations);
     }
 
-    private void writeOFile(List<String> data) throws IOException {
+    private void processLine(List<String> constants, List<Operation> operations, String line) {
+        line = line.trim();
+        for (int i = 0; i < line.length(); i++) {
+            String substring = line.substring(0, i);
+            if (Types.names.contains(substring)) { // we have a variable declaration "int a"
+                Types varType = Types.valueOf(substring.toUpperCase());
+
+                int j = i + 1;
+                while (line.charAt(j) == ' ') j++;
+
+                int k = j + 1;
+                while (k < line.length() && Character.isAlphabetic(line.charAt(k))) k++;
+                String varName = line.substring(j, k);
+
+
+            } else if (Functions.names.contains(substring)) {
+                Functions function = Functions.valueOf(substring.toUpperCase());
+                function.parse(line, constants, operations);
+            }
+        }
+    }
+
+    private void writeOFile(List<String> constants, List<Operation> operations) throws IOException {
+
+        StringBuilder constantsBuilder = new StringBuilder("section .data\n");
+        for (int i = 0; i < constants.size(); i++) {
+            String line = "\n\tc" + i + " : db \"" + constants.get(i) + "\", 10";
+            constantsBuilder.append(line);
+
+            String lineLen = "\n\tc" + i + "l: equ $-c" + i;
+            constantsBuilder.append(lineLen);
+        }
+        constantsBuilder.append("\n\n");
+
+        StringBuilder textBuilder = new StringBuilder("section .text\nglobal _start:\n_start:");
+        for (int i = 0; i < operations.size(); i++) {
+            Operation op = operations.get(i);
+            op.writeYourself(textBuilder);
+        }
+
         FileWriter wr = new FileWriter(outputFilePath);
         wr.write("; kobold compiler\n");
-
-        // section .data
-        wr.write("section .data");
-        for (String s : data) {
-            String stringPointer = Util.nextDataName();
-            wr.write("\n\t" + stringPointer + ":\tdb \"" + s + "\", 10");
-            wr.write("\n\t" + Util.nextDataName() + ":\tequ $-" + stringPointer);
-        }
-
-        // section .text
-        wr.write("\n\nsection .text\n\tglobal _start:\n");
-        wr.write("_start:");
-        for (int i = 0; i < data.size(); i++) {
-            wr.write("\n\tmov eax, 4");
-            wr.write("\n\tmov ebx, 1");
-            wr.write("\n\tmov ecx, _" + (2 * i + 1));
-            wr.write("\n\tmov edx, _" + (2 * i + 2));
-            wr.write("\n\tint 80h");
-        }
-
+        wr.write(constantsBuilder.toString());
+        wr.write(textBuilder.toString());
 
         // shutdown
         wr.write("\n\n\tmov eax, 1");

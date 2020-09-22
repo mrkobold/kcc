@@ -1,29 +1,30 @@
 ; kobold compiler
 section .data
-	_1:	db "Mr.Kobold!", 10
-	_2:	equ $-_1
-	_3:	db "Kingucim", 10
-	_4:	equ $-_3
-	_5:	db "1234_sdg++45", 10
-	_6:	equ $-_5
+
+	c0 : db "Mr.Kobold!", 10
+	c0l: equ $-c0
+	c1 : db "Bogarkam", 10
+	c1l: equ $-c1
+	c2 : db "Mrs.sgsdgsdg!", 10
+	c2l: equ $-c2
 
 section .text
-	global _start:
+global _start:
 _start:
 	mov eax, 4
 	mov ebx, 1
-	mov ecx, _1
-	mov edx, _2
+	mov ecx, c0
+	mov edx, c0l
 	int 80h
 	mov eax, 4
 	mov ebx, 1
-	mov ecx, _3
-	mov edx, _4
+	mov ecx, c1
+	mov edx, c1l
 	int 80h
 	mov eax, 4
 	mov ebx, 1
-	mov ecx, _5
-	mov edx, _6
+	mov ecx, c2
+	mov edx, c2l
 	int 80h
 
 	mov eax, 1
