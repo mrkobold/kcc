@@ -11,8 +11,8 @@ public class KCC {
     private final String outputFilePath;
 
     KCC(String sourceFileName) {
-        this.sourceFilePath = "c_source/" + sourceFileName;
-        this.outputFilePath = "compiled/" + sourceFileName.split("\\.")[0] + ".asm";
+        this.sourceFilePath = "src/main/resources/c_source/" + sourceFileName;
+        this.outputFilePath = "src/main/resources/compiled/" + sourceFileName.split("\\.")[0] + ".asm";
     }
 
     void compile() throws IOException {
