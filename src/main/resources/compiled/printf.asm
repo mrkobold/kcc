@@ -1,6 +1,5 @@
 ; kobold compiler
 section .data
-
 	c0 : db "Mr.Kobold!", 10
 	c0l: equ $-c0
 	c1 : db "Bogarkam", 10

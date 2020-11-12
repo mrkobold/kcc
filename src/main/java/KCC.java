@@ -1,9 +1,13 @@
+import functions.Function;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static functions.Function.FUNCTIONS;
+import static functions.Function.FUNCTION_MAP;
 
 public class KCC {
 
@@ -24,74 +28,103 @@ public class KCC {
         // skip to first line of "int main() \n {"
         lineI += 2;
 
-        List<String> constants = new ArrayList<>();
         List<Operation> operations = new ArrayList<>();
+        List<String> constants = new ArrayList<>();
+        Map<String, String> constLabelToVal = new HashMap<>();
+        List<String> mainOps = new ArrayList<>();
 
         String line;
         while (!(line = lines.get(lineI)).equals("}")) { // inside main(){} function
-            processLine(constants, operations, line);
+            processLine(constLabelToVal, mainOps, line);
             lineI++;
         }
 
-        writeOFile(constants, operations);
+        writeOFile(constLabelToVal, mainOps);
     }
 
-    private void processLine(List<String> constants, List<Operation> operations, String line) {
+    /**
+     * processes a line containing code
+     */
+    private void processLine(Map<String, String> constLabelToVal, List<String> mainOps, String line) {
         line = line.trim();
         for (int i = 0; i < line.length(); i++) {
             String substring = line.substring(0, i);
-            if (Types.names.contains(substring)) { // e.g. "int"
-                Types varType = Types.valueOf(substring.toUpperCase());
-                varType.parse(line, constants);
-
-                int j = i + 1;
-                while (line.charAt(j) == ' ') j++; // skip space between type and variable name
-
-                int k = j + 1;
-                while (k < line.length() && Character.isAlphabetic(line.charAt(k))) k++; // only alphabetic characters in variable name
-                String varName = line.substring(j, k);
-
-                while (line.charAt(j) == ' ') j++; // skip space between variable name and potential initialization
-                if (line.charAt(j) != '=') continue; // we don't have initialization
-
-                // if we have variable initialization
-                k = j + 1;
-
-            } else if (Functions.names.contains(substring)) { // e.g. "printf"
-                Functions function = Functions.valueOf(substring.toUpperCase());
-                function.parse(line, constants, operations);
+//            if (Types.names.contains(substring)) { // e.g. "int"
+//                Types varType = Types.valueOf(substring.toUpperCase());
+//                varType.parse(line, constants);
+//
+//                int j = i + 1;
+//                while (line.charAt(j) == ' ') j++; // skip space between type and variable name
+//
+//                int k = j + 1;
+//                while (k < line.length() && Character.isAlphabetic(line.charAt(k))) k++; // only alphabetic characters in variable name
+//                String varName = line.substring(j, k);
+//
+//                while (line.charAt(j) == ' ') j++; // skip space between variable name and potential initialization
+//                if (line.charAt(j) != '=') continue; // we don't have initialization
+//
+//                // if we have variable initialization
+//                k = j + 1;
+//
+//            } else
+            if (FUNCTIONS.contains(substring)) { // e.g. "printf_length"
+                // get function object
+                Function function = FUNCTION_MAP.get(substring);
+                function.parse(line, constLabelToVal, mainOps);
             }
         }
     }
 
-    private void writeOFile(List<String> constants, List<Operation> operations) throws IOException {
+    private void writeOFile(Map<String, String> constLabelToVal, List<String> mainOps) throws IOException {
+        String dataSection = writeDataSection(constLabelToVal);
+        String textSection = writeTextSection(mainOps);
+        String procedures = writeProcedures();
 
-        StringBuilder constantsBuilder = new StringBuilder("section .data\n");
-        for (int i = 0; i < constants.size(); i++) {
-            String line = "\n\tc" + i + " : db \"" + constants.get(i) + "\", 10";
-            constantsBuilder.append(line);
+        FileWriter fw = new FileWriter(outputFilePath);
+        fw.write("; kobold compiler\n");
+        fw.write(dataSection);
+        fw.write(textSection);
+        fw.write(procedures);
+        fw.close();
+    }
 
-            String lineLen = "\n\tc" + i + "l: equ $-c" + i;
-            constantsBuilder.append(lineLen);
-        }
-        constantsBuilder.append("\n\n");
+    private String writeProcedures() {
+        StringBuilder sb = new StringBuilder("; procedures section");
+        Function.getFUNCTION_MAP().values().forEach(f -> {
+            sb.append("\n")
+                    .append(f.getName())
+                    .append(":\n\t")
+                    .append(String.join("\n\t", f.getAsmCode()));
+        });
+        return sb.toString();
+    }
 
-        StringBuilder textBuilder = new StringBuilder("section .text\nglobal _start:\n_start:");
-        for (int i = 0; i < operations.size(); i++) {
-            Operation op = operations.get(i);
-            op.writeYourself(textBuilder);
-        }
-
-        FileWriter wr = new FileWriter(outputFilePath);
-        wr.write("; kobold compiler\n");
-        wr.write(constantsBuilder.toString());
-        wr.write(textBuilder.toString());
+    private String writeTextSection(List<String> mainOps) {
+        StringBuilder sb = new StringBuilder("section .text\nglobal _start:\n_start:\n\t");
+        mainOps.forEach(s -> sb.append(s).append("\n\t"));
 
         // shutdown
-        wr.write("\n\n\tmov eax, 1");
-        wr.write("\n\tmov ebx, 0");
-        wr.write("\n\tint 80h");
+        sb.append("\n\t")
+                .append("; over and out")
+                .append("\n\t")
+                .append("mov eax, 1     ; system exit")
+                .append("\n\t")
+                .append("mov ebx, 0     ; exit code 0")
+                .append("\n\t")
+                .append("int 80h        ; call kernel")
+                .append("\n\t");
+        return sb.append("\n").toString();
+    }
 
-        wr.close();
+    private static String writeDataSection(Map<String, String> constLabelToVal) {
+        StringBuilder sb = new StringBuilder("section .data\n");
+        for (Map.Entry<String, String> entry : constLabelToVal.entrySet()) {
+            sb.append("\t")
+                    .append(entry.getKey())
+                    .append(": db ")
+                    .append(entry.getValue())
+                    .append("\n");
+        }
+        return sb.append("\n").toString();
     }
 }
