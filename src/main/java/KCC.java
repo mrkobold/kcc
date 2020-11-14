@@ -28,9 +28,7 @@ public class KCC {
         // skip to first line of "int main() \n {"
         lineI += 2;
 
-        List<Operation> operations = new ArrayList<>();
-        List<String> constants = new ArrayList<>();
-        Map<String, String> constLabelToVal = new HashMap<>();
+        Map<String, Object> constLabelToVal = new HashMap<>();
         List<String> mainOps = new ArrayList<>();
 
         String line;
@@ -45,7 +43,7 @@ public class KCC {
     /**
      * processes a line containing code
      */
-    private void processLine(Map<String, String> constLabelToVal, List<String> mainOps, String line) {
+    private void processLine(Map<String, Object> constLabelToVal, List<String> mainOps, String line) {
         line = line.trim();
         for (int i = 0; i < line.length(); i++) {
             String substring = line.substring(0, i);
@@ -75,7 +73,7 @@ public class KCC {
         }
     }
 
-    private void writeOFile(Map<String, String> constLabelToVal, List<String> mainOps) throws IOException {
+    private void writeOFile(Map<String, Object> constLabelToVal, List<String> mainOps) throws IOException {
         String dataSection = writeDataSection(constLabelToVal);
         String textSection = writeTextSection(mainOps);
         String procedures = writeProcedures();
@@ -89,13 +87,12 @@ public class KCC {
     }
 
     private String writeProcedures() {
-        StringBuilder sb = new StringBuilder("; procedures section");
-        Function.getFUNCTION_MAP().values().forEach(f -> {
-            sb.append("\n")
-                    .append(f.getName())
-                    .append(":\n\t")
-                    .append(String.join("\n\t", f.getAsmCode()));
-        });
+        StringBuilder sb = new StringBuilder("; procedures section\n");
+        Function.getFUNCTION_MAP().values().forEach(f -> sb
+                .append(f.getName())
+                .append(":\n\t")
+                .append(String.join("\n\t", f.getAsmCode()))
+                .append("\n"));
         return sb.toString();
     }
 
@@ -116,12 +113,12 @@ public class KCC {
         return sb.append("\n").toString();
     }
 
-    private static String writeDataSection(Map<String, String> constLabelToVal) {
+    private static String writeDataSection(Map<String, Object> constLabelToVal) {
         StringBuilder sb = new StringBuilder("section .data\n");
-        for (Map.Entry<String, String> entry : constLabelToVal.entrySet()) {
+        for (Map.Entry<String, Object> entry : constLabelToVal.entrySet()) {
             sb.append("\t")
                     .append(entry.getKey())
-                    .append(": db ")
+                    .append(entry.getValue() instanceof Integer ? ": dd " : ": db ")
                     .append(entry.getValue())
                     .append("\n");
         }

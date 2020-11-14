@@ -17,14 +17,14 @@ public abstract class Function {
     static {
         Function printf_length = new Function("printf_length", List.of(new Parameter("String"), new Parameter("int")), Printf_length.ASM_LINES) {
             @Override
-            public void parse(String line, Map<String, String> constLabelToVal, List<String> mainOps) {
+            public void parse(String line, Map<String, Object> constLabelToVal, List<String> mainOps) {
                 String[] args = line.substring(name.length() + 1, line.length() - 2).split(",");
                 String textLabel = Function.nextLabel();
                 constLabelToVal.put(textLabel, args[0]); // the string itself
                 String lengthLabel = Function.nextLabel();
-                constLabelToVal.put(lengthLabel, args[1]); // string length
+                constLabelToVal.put(lengthLabel, Integer.parseInt(args[1])); // string length
 
-                mainOps.add("push " + lengthLabel);
+                mainOps.add("push dword [" + lengthLabel + "]");
                 mainOps.add("push " + textLabel);
                 mainOps.add("call printf_length");
             }
@@ -38,7 +38,7 @@ public abstract class Function {
     final List<Parameter> parameters;
     final List<String> asmCode;
 
-    public abstract void parse(String line, Map<String, String> constLabelToVal, List<String> mainOps); // TODO add operations also
+    public abstract void parse(String line, Map<String, Object> constLabelToVal, List<String> mainOps); // TODO add operations also
 
     private static String nextLabel() {
         return "lab" + (labelId++);
