@@ -47,24 +47,6 @@ public class KCC {
         line = line.trim();
         for (int i = 0; i < line.length(); i++) {
             String substring = line.substring(0, i);
-//            if (Types.names.contains(substring)) { // e.g. "int"
-//                Types varType = Types.valueOf(substring.toUpperCase());
-//                varType.parse(line, constants);
-//
-//                int j = i + 1;
-//                while (line.charAt(j) == ' ') j++; // skip space between type and variable name
-//
-//                int k = j + 1;
-//                while (k < line.length() && Character.isAlphabetic(line.charAt(k))) k++; // only alphabetic characters in variable name
-//                String varName = line.substring(j, k);
-//
-//                while (line.charAt(j) == ' ') j++; // skip space between variable name and potential initialization
-//                if (line.charAt(j) != '=') continue; // we don't have initialization
-//
-//                // if we have variable initialization
-//                k = j + 1;
-//
-//            } else
             if (FUNCTIONS.contains(substring)) { // e.g. "printf_length"
                 // get function object
                 Function function = FUNCTION_MAP.get(substring);
@@ -115,7 +97,9 @@ public class KCC {
 
     private static String writeDataSection(Map<String, Object> constLabelToVal) {
         StringBuilder sb = new StringBuilder("section .data\n");
-        for (Map.Entry<String, Object> entry : constLabelToVal.entrySet()) {
+        List<Map.Entry<String, Object>> entryList = new ArrayList<>(constLabelToVal.entrySet());
+        entryList.sort(Map.Entry.comparingByKey());
+        for (Map.Entry<String, Object> entry : entryList) {
             sb.append("\t")
                     .append(entry.getKey())
                     .append(entry.getValue() instanceof Integer ? ": dd " : ": db ")

@@ -20,9 +20,9 @@ public abstract class Function {
             public void parse(String line, Map<String, Object> constLabelToVal, List<String> mainOps) {
                 String[] args = line.substring(name.length() + 1, line.length() - 2).split(",");
                 String textLabel = Function.nextLabel();
-                constLabelToVal.put(textLabel, args[0]); // the string itself
+                constLabelToVal.put(textLabel, args[0].trim()); // the string itself
                 String lengthLabel = Function.nextLabel();
-                constLabelToVal.put(lengthLabel, Integer.parseInt(args[1])); // string length
+                constLabelToVal.put(lengthLabel, Integer.parseInt(args[1].trim())); // string length
 
                 mainOps.add("push dword [" + lengthLabel + "]");
                 mainOps.add("push " + textLabel);
