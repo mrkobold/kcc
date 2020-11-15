@@ -1,0 +1,2 @@
+-Extract to util class normalization of arguments: trim
+-printf_length do "\n"

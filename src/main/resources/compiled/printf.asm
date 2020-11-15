@@ -1,31 +1,28 @@
 ; kobold compiler
 section .data
-	c0 : db "Mr.Kobold!", 10
-	c0l: equ $-c0
-	c1 : db "Bogarkam", 10
-	c1l: equ $-c1
-	c2 : db "Mrs.sgsdgsdg!", 10
-	c2l: equ $-c2
+	lab_0: db "Kingucim",10,"MrKobold",10
+	lab_1: dd 18
 
 section .text
 global _start:
 _start:
-	mov eax, 4
-	mov ebx, 1
-	mov ecx, c0
-	mov edx, c0l
-	int 80h
-	mov eax, 4
-	mov ebx, 1
-	mov ecx, c1
-	mov edx, c1l
-	int 80h
-	mov eax, 4
-	mov ebx, 1
-	mov ecx, c2
-	mov edx, c2l
-	int 80h
-
-	mov eax, 1
-	mov ebx, 0
-	int 80h
+	push dword [lab_1]
+	push lab_0
+	call printf_length
+	
+	; over and out
+	mov eax, 1     ; system exit
+	mov ebx, 0     ; exit code 0
+	int 80h        ; call kernel
+	
+; procedures section
+printf_length:
+	push ebp               ; push caller bp
+	mov ebp, esp           ; current bp = current sp
+	mov eax, 4             ; sys_write
+	mov ebx, 1             ; stdout (file descriptor)
+	mov ecx, [ebp + 8]     ; message to write
+	mov edx, [ebp + 12]    ; message length
+	int 80h                ; call kernel
+	pop ebp                ; restore caller bp
+	ret                    ; return from procedure
