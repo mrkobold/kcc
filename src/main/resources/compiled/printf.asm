@@ -1,14 +1,9 @@
 ; kobold compiler
 section .data
-	lab_0: db "Kingucim",10,"MrKobold",10
-	lab_1: dd 18
 
 section .text
 global _start:
 _start:
-	push dword [lab_1]
-	push lab_0
-	call printf_length
 	
 	; over and out
 	mov eax, 1     ; system exit

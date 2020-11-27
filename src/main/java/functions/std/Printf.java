@@ -4,6 +4,7 @@ import functions.Function;
 import functions.FunctionUtils;
 import functions.Parameter;
 import lombok.AllArgsConstructor;
+import types.Type;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ public final class Printf extends Function {
     public static final List<String> ASM_LINES = Arrays.stream(CODE.split("\n")).collect(Collectors.toList());
 
     public static final Printf INSTANCE = new Printf("printf_length",
-            List.of(new Parameter("String")), ASM_LINES);
+            List.of(new Parameter(Type.getTYPES_MAP().get("string"), "s", -12)), ASM_LINES);
 
     private Printf(String name, List<Parameter> parameters, List<String> asmCode) {
         super(name, parameters, asmCode);

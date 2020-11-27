@@ -1,4 +1,5 @@
+
 int main()
 {
-    printf_length("Kingucim\nMrKobold\n");
+    printf("Kingucim\nMrKobold\n");
 }
