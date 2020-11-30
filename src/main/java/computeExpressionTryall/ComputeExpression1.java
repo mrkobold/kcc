@@ -9,7 +9,12 @@ import java.util.LinkedList;
 public class ComputeExpression1 {
     //                                        1       5
 //    private static final String E_ORIGINAL = "1+2*3/6*4-4*(1+1)*2*(2+3*(3+4))+1";
-    private static final String E_ORIGINAL = "1+2*(  1+2* (1+2*3) *2+4*(5+6* (5+3) -3)  )";
+//    private static final String E_ORIGINAL = "1+2*(  1+2* (1+2*3) *2+4*(5+6* (5+3) -3)  )";
+//    private static final String E_ORIGINAL = "((((1+2)*3)*2) + 6)/2";
+//    private static final String E_ORIGINAL = "((((1+2)*3)*2) + 6)/2/2*5";
+//    private static final String E_ORIGINAL = "1+2+3+4+5+6+7+8+9";
+//    private static final String E_ORIGINAL = "(5) * ((2) + (3))";
+    private static final String E_ORIGINAL = "((((5)))) * ((2) + (3))";
 
     public static void main(String[] args) {
         Node<?> root = parseTree();
@@ -33,7 +38,8 @@ public class ComputeExpression1 {
             if (e.charAt(i) == ')') { // ')'
                 // close parenthesis tree
                 Node linkedNode = stack.removeLast();
-                while (((OperatorNode) stack.peekLast()).getParenthesisDepth() == depth) {
+                while (!stack.isEmpty() &&
+                        ((OperatorNode) stack.peekLast()).getParenthesisDepth() == depth) {
                     stack.peekLast().right = linkedNode;
                     linkedNode = stack.removeLast();
                 }
