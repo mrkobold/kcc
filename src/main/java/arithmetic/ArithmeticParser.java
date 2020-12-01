@@ -1,29 +1,17 @@
-package computeExpressionTryall;
+package arithmetic;
 
-import computeExpressionTryall.ComputeExpression.Node;
-import computeExpressionTryall.ComputeExpression.OperandNode;
-import computeExpressionTryall.ComputeExpression.OperatorNode;
+import arithmetic.Node.Op;
+import arithmetic.Node.IntegerNode;
+import arithmetic.Node.OperatorNode;
+import arithmetic.Node.SymbolNode;
 
 import java.util.LinkedList;
 
-public class ComputeExpression1 {
-    //                                        1       5
-//    private static final String E_ORIGINAL = "1+2*3/6*4-4*(1+1)*2*(2+3*(3+4))+1";
-//    private static final String E_ORIGINAL = "1+2*(  1+2* (1+2*3) *2+4*(5+6* (5+3) -3)  )";
-//    private static final String E_ORIGINAL = "((((1+2)*3)*2) + 6)/2";
-//    private static final String E_ORIGINAL = "((((1+2)*3)*2) + 6)/2/2*5";
-//    private static final String E_ORIGINAL = "1+2+3+4+5+6+7+8+9";
-//    private static final String E_ORIGINAL = "(5) * ((2) + (3))";
-    private static final String E_ORIGINAL = "((((5)))) * ((2) + (3))";
+public final class ArithmeticParser {
+    static final int PP = 5;
 
-    public static void main(String[] args) {
-        Node<?> root = parseTree();
-
-        System.out.println(ComputeExpression.compute(root));
-    }
-
-    private static Node<?> parseTree() {
-        String e = E_ORIGINAL.replaceAll(" ", "");
+    public static Node<?> parseTree(String expression) {
+        String e = expression.replaceAll(" ", "");
         int i = 0;
         int depth = 0;
         LinkedList<Node<?>> stack = new LinkedList<>();
@@ -37,7 +25,7 @@ public class ComputeExpression1 {
 
             if (e.charAt(i) == ')') { // ')'
                 // close parenthesis tree
-                Node linkedNode = stack.removeLast();
+                Node<?> linkedNode = stack.removeLast();
                 while (!stack.isEmpty() &&
                         ((OperatorNode) stack.peekLast()).getParenthesisDepth() == depth) {
                     stack.peekLast().right = linkedNode;
@@ -49,18 +37,14 @@ public class ComputeExpression1 {
                 continue;
             }
 
-            if (Character.isDigit(e.charAt(i))) { // operand
+            if (isPartOfSymbol(e, i)) { // operand
                 // read in operand
-                int j = i;
-                while (j < e.length() && Character.isDigit(e.charAt(j))) j++;
-                int operand = Integer.parseInt(e.substring(i, j));
-                i = j;
-                stack.addLast(new OperandNode(operand));
+                i = getOperand(e, i, stack);
                 continue;
             }
 
             // character is operator
-            OperatorNode operatorNode = new OperatorNode(ComputeExpression.Op.fromChar(e.charAt(i)), depth);
+            OperatorNode operatorNode = new OperatorNode(Op.fromChar(e.charAt(i)), depth);
 
             int currentOperatorPrio = operatorNode.getPrio();
             int prevOperatorPrio;
@@ -86,5 +70,33 @@ public class ComputeExpression1 {
             stack.get(j).right = stack.get(j + 1);
         }
         return stack.getFirst();
+    }
+
+    private static int getOperand(String e, int i, LinkedList<Node<?>> stack) {
+        int j = i;
+        boolean onlyNumber = true;
+        while (j < e.length() && isPartOfSymbol(e, j)) {
+            if (Character.isAlphabetic(e.charAt(j)) || e.charAt(j) == '_') {
+                onlyNumber = false;
+            }
+            j++;
+        }
+        String operandString = e.substring(i, j);
+        i = j;
+
+        if (onlyNumber) {
+            int operand = Integer.parseInt(operandString);
+            stack.addLast(new IntegerNode(operand));
+        } else {
+            stack.addLast(new SymbolNode(operandString));
+        }
+        return i;
+    }
+
+    private static boolean isPartOfSymbol(String e, int i) {
+        char c = e.charAt(i);
+        return Character.isDigit(c) ||
+                Character.isAlphabetic(c) ||
+                '_' == c;
     }
 }

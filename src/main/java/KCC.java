@@ -1,3 +1,5 @@
+import arithmetic.ArithmeticParser;
+import arithmetic.Node;
 import functions.Function;
 import functions.Parameter;
 import types.Type;
@@ -59,6 +61,7 @@ public class KCC {
 //          }
             if (currentExpression.contains("return")) { // compute result into eax -> ret
                 String resultExpression = currentExpression.substring("return".length()).trim();
+                Node<?> root = ArithmeticParser.parseTree(resultExpression);
                 String asmCode = computeIntResultIntoEAX(resultExpression, b.getParameters());
                 System.out.println();
                 continue;
