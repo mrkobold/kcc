@@ -3,31 +3,33 @@ package functions;
 import functions.std.Printf;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.With;
-import lombok.experimental.Wither;
 import types.Type;
 
 import java.util.*;
 
 @AllArgsConstructor
 @Getter
-public abstract class Function {
+public class Function {
     @Getter
     public static final Map<String, Function> FUNCTION_MAP = new HashMap<>();
+
     static {
         FUNCTION_MAP.put(Printf.INSTANCE.getName(), Printf.INSTANCE);
     }
 
-    public static final Set<String> FUNCTIONS = FUNCTION_MAP.keySet();
+    public static final Set<String> FUNCTIONS = new HashSet<>(FUNCTION_MAP.keySet());
 
     protected final String name;
     protected final List<Parameter> parameters;
     protected final List<String> asmCode;
 
-    public abstract void parse(String line, Map<String, Object> constLabelToVal, List<String> mainOps); // TODO add operations also
+    public static void addFunction(Builder b) {
+        FUNCTION_MAP.put(b.name, b.build());
+        FUNCTIONS.add(b.name);
+    }
 
-    public static Builder getBuilder() {
-        return new Builder();
+    public void parse(String line, Map<String, Object> constLabelToVal, List<String> mainOps) {
+
     }
 
     @Getter
@@ -55,6 +57,15 @@ public abstract class Function {
         public Builder withParameter(Parameter parameter) {
             this.parameters.add(parameter);
             return this;
+        }
+
+        public Builder withAsmCode(String asmCode) {
+            this.asmCode.addAll(Arrays.asList(asmCode.split("\n")));
+            return this;
+        }
+
+        public Function build() {
+            return new Function(this.name, this.parameters, this.asmCode);
         }
     }
 }
