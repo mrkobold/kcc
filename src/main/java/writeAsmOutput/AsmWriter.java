@@ -25,7 +25,7 @@ public final class AsmWriter {
     }
 
     private static void writeTextSection(FileWriter fw, Map<String, Function> functions) throws IOException {
-        fw.write("section .text\nglobal _start:\n_start:\n\t");
+        fw.write("section .text\nglobal _start:\n");
         writeFunction(fw, functions.remove("main"));
 
         for (Function f : functions.values()) {
@@ -35,12 +35,26 @@ public final class AsmWriter {
 
     private static void writeFunction(FileWriter fw, Function f) throws IOException {
         writeFunction(fw, f, "_start");
+        // shutdown
+        fw.append("\t")
+                .append("; over and out")
+                .append("\n\t")
+                .append("mov eax, 1     ; system exit")
+                .append("\n\t")
+                .append("mov ebx, 0     ; exit code 0")
+                .append("\n\t")
+                .append("int 80h        ; call kernel")
+                .append("\n\n");
     }
 
     private static void writeFunction(FileWriter fw, Function f, String label) throws IOException {
         fw.append(label).append(":\n");
+        fw.append("\tpush ebp\n").append("\tmov ebp, esp\n\n");
         for (String line : f.getAsmCode()) {
             if (line.trim().isEmpty()) continue;
+            if ("ret".equals(line)) {
+                fw.append("\tpop ebp\n");
+            }
             fw.append("\t").append(line).append("\n");
         }
         fw.append("\n");

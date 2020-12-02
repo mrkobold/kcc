@@ -1,7 +1,7 @@
 
 int sum(int a, int b)
 {
-    return a + b * a * 4;
+    return a + b;
 }
 
 int main()

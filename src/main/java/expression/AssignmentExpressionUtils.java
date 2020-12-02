@@ -42,7 +42,7 @@ public final class AssignmentExpressionUtils {
                 .map(String::trim) // "a", "4", "b"
                 .collect(Collectors.toList());
         for (String varString : varStrings) {
-            functionAsmCode.append("push dword");
+            functionAsmCode.append("push dword ");
             Optional<Integer> optionalInteger = tryParsingInteger(varString);
             if (optionalInteger.isPresent()) {
                 functionAsmCode.append(optionalInteger).append("\n");

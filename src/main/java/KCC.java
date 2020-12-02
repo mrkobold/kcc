@@ -133,7 +133,7 @@ public class KCC {
             while (!SPACERS.contains(s.charAt(j)) && s.charAt(j) != ')' && s.charAt(j) != ',') j++;
             String varName = s.substring(i, j);
 
-            b.withParameter(new Parameter(Type.getTYPES_MAP().get(typeName), varName, (-4) * (++varCounter) - 8));
+            b.withParameter(new Parameter(Type.getTYPES_MAP().get(typeName), varName, (-4) * (++varCounter) - 4));
         }
         return j;
     }

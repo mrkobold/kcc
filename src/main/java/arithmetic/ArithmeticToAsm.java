@@ -25,7 +25,13 @@ public final class ArithmeticToAsm {
         sb
                 .append("mov ebx,eax\n")
                 .append("pop eax\n")
-                .append(operation(root)).append(" eax,ebx\n");
+                .append(operation(root));
+        if (operation(root).equals("mul")) {
+            sb.append(" ebx\n");
+        } else {
+            sb.append(" eax,ebx\n");
+
+        }
     }
 
     private static Object getImmediateOrSymbolToAsm(Node<?> root, List<Parameter> parameters) {
