@@ -4,13 +4,19 @@ int sum(int a, int b)
     return a + b;
 }
 
+int complicated(int a, int b, int c)
+{
+    return a + b * (c - 4);
+}
+
 int main()
 {
     int a;
-    a = 5;
+    a = 1;
     int b;
-    b = 6;
-
+    b = 2;
     int c;
-    c = sum(a,b);
+    c = 6;
+    int d;
+    d = complicated(a,b,c);
 }

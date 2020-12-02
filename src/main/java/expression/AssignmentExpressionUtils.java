@@ -41,7 +41,8 @@ public final class AssignmentExpressionUtils {
         List<String> varStrings = Arrays.stream(varsDirty)
                 .map(String::trim) // "a", "4", "b"
                 .collect(Collectors.toList());
-        for (String varString : varStrings) {
+        for (int j = varStrings.size() - 1; j >= 0; j--) {
+            String varString = varStrings.get(j);
             functionAsmCode.append("push dword ");
             Optional<Integer> optionalInteger = tryParsingInteger(varString);
             if (optionalInteger.isPresent()) {
