@@ -1,5 +1,6 @@
 package functions;
 
+import functions.std.PrintInt;
 import functions.std.Printf;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class Function {
 
     static {
         FUNCTION_MAP.put(Printf.INSTANCE.getName(), Printf.INSTANCE);
+        FUNCTION_MAP.put(PrintInt.INSTANCE.getName(), PrintInt.INSTANCE);
     }
 
     public static final Set<String> FUNCTIONS = new HashSet<>(FUNCTION_MAP.keySet());

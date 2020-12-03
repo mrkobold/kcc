@@ -52,7 +52,8 @@ public final class AsmWriter {
         fw.append("\tpush ebp\n").append("\tmov ebp, esp\n\n");
         for (String line : f.getAsmCode()) {
             if (line.trim().isEmpty()) continue;
-            if ("ret".equals(line)) {
+            if (line.startsWith("ret")) {
+                fw.append("\n\tmov esp, ebp\n");
                 fw.append("\tpop ebp\n");
             }
             fw.append("\t").append(line).append("\n");
@@ -62,6 +63,7 @@ public final class AsmWriter {
 
     private static void writeVarsSection(FileWriter fw, Set<AsmVariable> asmVars) throws IOException {
         fw.write("section .bss\n");
+        fw.append("\tchar_print_int: resb 4\n");
 
         for (AsmVariable var : asmVars) {
             fw.append("\t").append(var.getName()).append(": resb 4\n");
