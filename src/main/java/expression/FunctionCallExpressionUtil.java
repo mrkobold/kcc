@@ -1,7 +1,5 @@
 package expression;
 
-import arithmetic.ArithmeticParser;
-import arithmetic.ArithmeticToAsm;
 import functions.Function;
 import variables.AsmVariable;
 
@@ -11,28 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static expression.ExpressionTypeUtil.isFunctionCallExpression;
+import static expression.AssignmentExpressionUtils.tryParsingInteger;
 
-public final class AssignmentExpressionUtils {
-    public static void handleValueAssignment(Function.Builder b,
-                                             StringBuilder functionAsmCode,
-                                             Map<String, AsmVariable> currentFunctionAsmVariables,
-                                             String currentExpression) {
-        String lValueName = currentExpression.split("=")[0].trim();
-        AsmVariable lValue = currentFunctionAsmVariables.get(lValueName);
-        String rValue = currentExpression.split("=")[1].trim();
-
-        if (!isFunctionCallExpression(rValue)) {
-            String lValueAsm = ArithmeticToAsm.toAsm(ArithmeticParser.parseTree(rValue), b.getParameters()).toString();
-            functionAsmCode.append(lValueAsm);
-        } else {
-            assignCallResult(b, functionAsmCode, currentFunctionAsmVariables, rValue);
-        }
-        functionAsmCode.append("\n").append("mov [").append(lValue.getName()).append("],eax\n");
-    }
-
-    private static void assignCallResult(Function.Builder b, StringBuilder functionAsmCode, Map<String, AsmVariable> currentFunctionAsmVariables,
-                                         String calledFunctionWithArgs) {
+public final class FunctionCallExpressionUtil {
+    public static void handleFunctionCall(StringBuilder functionAsmCode,
+                                          Map<String, AsmVariable> currentFunctionAsmVariables,
+                                          Function.Builder b,
+                                          String calledFunctionWithArgs) {
         // take symbols and push on stack: immediate, var, arg
         String[] varsDirty = calledFunctionWithArgs
                 .split("\\(")[1] // "a, 4, b)"
@@ -64,13 +47,4 @@ public final class AssignmentExpressionUtils {
         }
         functionAsmCode.append("call ").append(calledFunctionWithArgs.split("\\(")[0]).append("\n");
     }
-
-    public static Optional<Integer> tryParsingInteger(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s));
-        } catch (Exception ex) {
-            return Optional.empty();
-        }
-    }
-
 }

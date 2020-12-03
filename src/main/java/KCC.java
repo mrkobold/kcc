@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static expression.AssignmentExpressionUtils.handleValueAssignment;
 import static expression.ExpressionTypeUtil.*;
+import static expression.FunctionCallExpressionUtil.handleFunctionCall;
 import static variables.AsmVariableUtils.handleDeclarationExpression;
 import static functions.Function.*;
 import static writeAsmOutput.AsmWriter.writeAsmOutput;
@@ -92,7 +93,8 @@ public class KCC {
                 continue;
             }
             if (isFunctionCallExpression(currentExpression)) {
-
+                handleFunctionCall(functionAsmCode, currentFunctionAsmVariables, b, currentExpression);
+                i = j + 1;
                 continue;
             }
             if (isReturnExpression(currentExpression)) { // compute result into eax -> ret
